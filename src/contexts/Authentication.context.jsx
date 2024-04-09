@@ -98,8 +98,8 @@ export default function AuthProvider({ children }) {
         title: "Ooops...",
         text: error.response.data.message || error.response.data,
         icon: "error",
-        cancelButtonText: cancelText,
-        cancelButtonColor: middleBlue,
+        confirmButtonText: cancelText,
+        confirmButtonColor: middleBlue,
         color: darkBlue,
         iconColor: "red",
       }).then(() => {

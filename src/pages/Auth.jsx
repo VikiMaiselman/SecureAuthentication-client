@@ -21,6 +21,9 @@ import {
 } from "./AuthStyles.js";
 import { useAuth } from "../contexts/Authentication.context.jsx";
 
+const phoneRegExp =
+  /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{3}\\)[ \\-]*)|(\\[0-9]{3})[ \\-]*)|[0-9]{3}?[ \\-]*[0-9]{3,5}?$/;
+
 export default function Auth() {
   /* state and hooks */
   const [activeTab, setActiveTab] = React.useState(0);
@@ -29,8 +32,11 @@ export default function Auth() {
     password: "",
     phone: "",
   });
+
+  /* error state */
   const [isTwilioError, setIsTwilioError] = React.useState(false);
   const [emailError, setEmailError] = React.useState("");
+  const [phoneError, setPhoneError] = React.useState("");
   const navigate = useNavigate();
 
   /* context */
@@ -44,12 +50,12 @@ export default function Auth() {
   const handleChangeUserData = (e) => {
     let name, value;
     setEmailError("");
+    setPhoneError("");
 
     if (typeof e === "object") {
       name = e.target.name;
       value = e.target.value;
     }
-
     if (typeof e === "string") {
       name = "phone";
       value = e;
@@ -64,6 +70,18 @@ export default function Auth() {
   const handleEmailBlur = () => {
     const email = userData.email;
     emailValidationSchema.validate({ email }).catch((error) => setEmailError(error.message));
+  };
+  const checkPhoneValid = (value, country) => {
+    if (value.length <= 3) {
+      setPhoneError("");
+      return true; // only dial code
+    } else if (!value.match(phoneRegExp) || value.length !== 12) {
+      setPhoneError("Invalid phone number");
+      return false;
+    } else {
+      setPhoneError("");
+      return true;
+    }
   };
 
   const handleClick = async () => {
@@ -148,6 +166,8 @@ export default function Auth() {
               onChange={handleChangeUserData}
               name="phone"
               value={userData.phone}
+              isValid={checkPhoneValid}
+              defaultErrorMessage={phoneError}
             />
           </>
         )}
