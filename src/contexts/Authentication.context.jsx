@@ -91,7 +91,7 @@ export default function AuthProvider({ children }) {
       return await signUp(data);
     } catch (error) {
       let cancelText = "Try again.";
-      if (error.response.data?.message?.startsWith("TWILIO:") || error.response.data?.startsWith("TWILIO:")) {
+      if (error.response?.data?.message?.startsWith?.("TWILIO:") || error.response?.data?.startsWith?.("TWILIO:")) {
         cancelText = "Authenticate w/o OTP (this will still be safe)";
       }
       Swal.fire({

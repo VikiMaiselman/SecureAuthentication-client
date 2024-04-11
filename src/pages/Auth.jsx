@@ -7,6 +7,10 @@ import "react-phone-input-2/lib/bootstrap.css";
 
 import { composeDataForBackend } from "../util/helpers.js";
 import emailValidationSchema from "../util/emailValidation.js";
+import { isPhoneValid } from "../util/phoneValidation.js";
+
+import { useAuth } from "../contexts/Authentication.context.jsx";
+
 import {
   AuthBackground,
   AuthForm,
@@ -19,10 +23,6 @@ import {
   StyledTab,
   StyledTextField,
 } from "./AuthStyles.js";
-import { useAuth } from "../contexts/Authentication.context.jsx";
-
-const phoneRegExp =
-  /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{3}\\)[ \\-]*)|(\\[0-9]{3})[ \\-]*)|[0-9]{3}?[ \\-]*[0-9]{3,5}?$/;
 
 export default function Auth() {
   /* state and hooks */
@@ -42,6 +42,15 @@ export default function Auth() {
   /* context */
   const { checkStatus, isBeingVerified, isApproved, signup } = useAuth();
 
+  /* computed values */
+  const shouldDisableButton =
+    !userData.email ||
+    (activeTab === 0 && !userData.phone) ||
+    !userData.password ||
+    Boolean(emailError) ||
+    Boolean(phoneError);
+
+  /* event handlers for onChange */
   const handleChangeTab = (e, newValue) => {
     setActiveTab(() => newValue);
     checkStatus();
@@ -61,29 +70,18 @@ export default function Auth() {
       value = e;
     }
 
-    const updaterFunc = (prevSt) => {
+    setUserData((prevSt) => {
       return { ...prevSt, [name]: value };
-    };
-    setUserData(updaterFunc);
+    });
   };
 
+  /* event handlers for validation */
   const handleEmailBlur = () => {
     const email = userData.email;
     emailValidationSchema.validate({ email }).catch((error) => setEmailError(error.message));
   };
-  const checkPhoneValid = (value, country) => {
-    if (value.length <= 3) {
-      setPhoneError("");
-      return true; // only dial code
-    } else if (!value.match(phoneRegExp) || value.length !== 12) {
-      setPhoneError("Invalid phone number");
-      return false;
-    } else {
-      setPhoneError("");
-      return true;
-    }
-  };
 
+  /* event handlers for onClick */
   const handleClick = async () => {
     const data = composeDataForBackend(userData, activeTab);
     const response = await signup(data);
@@ -92,11 +90,8 @@ export default function Auth() {
       isBeingVerified(response);
       return navigate("/verification", { state: data, replace: true });
     }
+    if (response === "isTwilioError") setIsTwilioError(() => true);
 
-    // if twilio didn't work
-    if (response === "isTwilioError") {
-      setIsTwilioError(() => true);
-    }
     // other error
     return navigate("/sign-up");
   };
@@ -166,17 +161,17 @@ export default function Auth() {
               onChange={handleChangeUserData}
               name="phone"
               value={userData.phone}
-              isValid={checkPhoneValid}
+              isValid={(value) => isPhoneValid(value, setPhoneError)}
               defaultErrorMessage={phoneError}
             />
           </>
         )}
 
-        <StyledButton variant="contained" onClick={handleClick}>
+        <StyledButton variant="contained" onClick={handleClick} disabled={shouldDisableButton}>
           {activeTab === 0 ? "Sign Up" : "Sign In"}
         </StyledButton>
         {/* <PaleStyledButton variant="contained" size="small" onClick={handleClickNoTwilio} disabled={!isTwilioError}> */}
-        <PaleStyledButton variant="contained" size="small" onClick={handleClickNoTwilio}>
+        <PaleStyledButton variant="contained" size="small" onClick={handleClickNoTwilio} disabled={shouldDisableButton}>
           {activeTab === 0 ? "Sign Up (no Twilio)" : "Sign In (no Twilio)"}
         </PaleStyledButton>
       </AuthForm>

@@ -11,7 +11,7 @@ import TransactionForm from "../pages/TransactionForm";
 
 import { useAuth } from "../contexts/Authentication.context";
 
-export default function AppRoutes() {
+export default React.memo(function AppRoutes() {
   const { user } = useAuth();
 
   return (
@@ -74,4 +74,4 @@ export default function AppRoutes() {
       <Route path="*" element={<Navigate to="/sign-up" />} />
     </Routes>
   );
-}
+});

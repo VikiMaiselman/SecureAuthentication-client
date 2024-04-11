@@ -27,6 +27,7 @@ export function getDateLabel(transactionDate) {
 export async function signUp(data) {
   try {
     const result = await axios.post(`${URL}/sign-up`, data, { withCredentials: true }, HEADERS);
+    console.log(result);
     return result.data;
   } catch (error) {
     console.error("from signup", error);
