@@ -1,6 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
+import CircularProgress from "@mui/material/CircularProgress";
 import Layout from "../layouts/Layout";
 import LayoutMain from "../layouts/LayoutMain";
 import Transactions from "../pages/Transactions";
@@ -10,11 +12,17 @@ import Logout from "../pages/Logout";
 import TransactionForm from "../pages/TransactionForm";
 
 import { useAuth } from "../contexts/Authentication.context";
+import { Typography, Box } from "@mui/material";
 
 export default React.memo(function AppRoutes() {
-  const { user } = useAuth();
+  const user = useSelector((state) => state.user);
 
-  return (
+  return user.isAuthenticated === null ? (
+    <Box height={"100vh"} display="flex" alignItems="center" justifyContent="center" gap={4}>
+      <Typography variant="h4">Loading</Typography>
+      <CircularProgress />
+    </Box>
+  ) : (
     <Routes>
       <Route path="/" index element={<LayoutMain />} />
       <Route

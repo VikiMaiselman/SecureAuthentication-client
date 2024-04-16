@@ -30,8 +30,23 @@ export async function signUp(data) {
     console.log(result);
     return result.data;
   } catch (error) {
-    console.error("from signup", error);
-    throw error;
+    console.error(error);
+    let cancelText = "Try again.";
+    if (error.response?.data?.message?.startsWith?.("TWILIO:") || error.response?.data?.startsWith?.("TWILIO:")) {
+      cancelText = "Authenticate w/o OTP (this will still be safe)";
+    }
+    Swal.fire({
+      title: "Ooops...",
+      text: error.response.data.message || error.response.data,
+      icon: "error",
+      confirmButtonText: cancelText,
+      confirmButtonColor: middleBlue,
+      color: darkBlue,
+      iconColor: "red",
+    }).then(() => {
+      isTwilioError = true;
+    });
+    return "isTwilioError";
   }
 }
 
@@ -40,17 +55,33 @@ export async function verifyUser(fullData) {
     const result = await axios.post(`${URL}/verification`, fullData, { withCredentials: true }, HEADERS);
     return result.data;
   } catch (error) {
-    console.error("from login", error);
-    throw error;
+    console.error(error);
+    Swal.fire({
+      title: "Ooops...",
+      text: error.response.data,
+      icon: "error",
+      confirmButtonText: "Please, try again.",
+      confirmButtonColor: middleBlue,
+      color: darkBlue,
+      iconColor: "red",
+    });
   }
 }
 
-export async function logOut() {
+export async function logout() {
   try {
     await axios.get(`${URL}/logout`, { withCredentials: true }, HEADERS);
   } catch (error) {
     console.error(error);
-    throw error;
+    Swal.fire({
+      title: "Ooops...",
+      text: "We could not log you out.",
+      icon: "error",
+      confirmButtonText: "Please, return to home page and try again.",
+      confirmButtonColor: middleBlue,
+      color: darkBlue,
+      iconColor: "red",
+    });
   }
 }
 
@@ -60,7 +91,16 @@ export async function checkAuthStatus() {
     return result.data;
   } catch (error) {
     console.error(error);
-    throw error;
+    // createErrorAlert("We could not check your authentication status.");
+    Swal.fire({
+      title: "Ooops...",
+      text: "We could not check your authentication status.",
+      icon: "error",
+      confirmButtonText: "Please, try again.",
+      confirmButtonColor: middleBlue,
+      color: darkBlue,
+      iconColor: "red",
+    });
   }
 }
 
@@ -93,8 +133,6 @@ export async function createTransaction(txData) {
       confirmButtonColor: middleBlue,
       color: darkBlue,
     });
-
-    await getTransactions();
     return result.data;
   } catch (error) {
     console.error(error);
@@ -127,3 +165,15 @@ export async function getUserBalance() {
     });
   }
 }
+
+const createErrorAlert = (text) => {
+  return Swal.fire({
+    title: "Ooops...",
+    text: text,
+    icon: "error",
+    confirmButtonText: "Please, try again.",
+    confirmButtonColor: middleBlue,
+    color: darkBlue,
+    iconColor: "red",
+  });
+};

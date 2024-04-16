@@ -12,7 +12,7 @@ import {
   StyledListItem,
   StyledListItemText,
   StyledLogo,
-} from "./SidebarMainStyled.jsx";
+} from "./SidebarMainStyled.js";
 
 export default function SidebarMain({ user, balance }) {
   return (

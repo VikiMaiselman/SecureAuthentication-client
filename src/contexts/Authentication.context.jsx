@@ -1,7 +1,7 @@
 import React from "react";
 import Swal from "sweetalert2";
 
-import { checkAuthStatus, signUp, logOut, verifyUser, getUserBalance, getTransactions } from "../util/helpers";
+import { checkAuthStatus, signUp, logout, verifyUser, getUserBalance, getTransactions } from "../util/helpers";
 import { middleBlue, darkBlue } from "../global-styles/Colors";
 
 const AuthContext = React.createContext();
@@ -9,7 +9,7 @@ const AuthContext = React.createContext();
 export default function AuthProvider({ children }) {
   const [user, setUser] = React.useState({
     username: "",
-    isAuthenticated: "",
+    isAuthenticated: null,
     isBeingVerified: "",
     id: ",",
   });

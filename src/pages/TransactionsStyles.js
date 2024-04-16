@@ -30,6 +30,7 @@ export const StyledListItemText = styled(ListItemText)({
 
 export const StyledListItem = styled(ListItem)({
   background: "#ECF2FD",
+  margin: "1em auto",
   "@media (max-width: 768px)": {
     flexDirection: "column",
   },

@@ -1,20 +1,34 @@
 import React from "react";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined.js";
+import { useDispatch, useSelector } from "react-redux";
 
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined.js";
 import SidebarMain from "../components/SidebarMain.jsx";
 
+import { checkAuthStatus } from "../util/helpers.js";
 import { DRAWER_WIDTH } from "../util/config.js";
-import { useAuth } from "../contexts/Authentication.context.jsx";
-
 import { LinkToLogout, StyledContainer, StyledSubheader, StyledUserData } from "./LayoutMainStyles.js";
 
 export default function LayoutMain({ children }) {
-  const { user, checkStatus, balance } = useAuth();
+  const user = useSelector((state) => state.user);
+  const balance = useSelector((state) => state.balance);
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
     const updUserStatus = async () => {
       try {
-        await checkStatus();
+        const result = await checkAuthStatus();
+        dispatch({
+          type: "SET_USER",
+          payload: {
+            username: result.user ? result.user.username : "",
+            isAuthenticated: result.isAuthenticated,
+            id: result.user ? result.user._id : "",
+          },
+        });
+        dispatch({
+          type: "SET_BALANCE",
+          payload: result.user ? result.user.balance : "",
+        });
       } catch (error) {
         console.error(error);
       }

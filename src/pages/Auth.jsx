@@ -1,15 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { Box, Typography, Tabs } from "@mui/material";
 
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
 
-import { composeDataForBackend } from "../util/helpers.js";
+import { composeDataForBackend, signUp } from "../util/helpers.js";
 import emailValidationSchema from "../util/emailValidation.js";
 import { isPhoneValid } from "../util/phoneValidation.js";
-
-import { useAuth } from "../contexts/Authentication.context.jsx";
 
 import {
   AuthBackground,
@@ -33,14 +32,15 @@ export default function Auth() {
     phone: "",
   });
 
+  const user = useSelector((state) => state.user);
+  const balance = useSelector((state) => state.balance);
+  const dispatch = useDispatch();
+
   /* error state */
   const [isTwilioError, setIsTwilioError] = React.useState(false);
   const [emailError, setEmailError] = React.useState("");
   const [phoneError, setPhoneError] = React.useState("");
   const navigate = useNavigate();
-
-  /* context */
-  const { checkStatus, isBeingVerified, isApproved, signup } = useAuth();
 
   /* computed values */
   const shouldDisableButton =
@@ -53,7 +53,6 @@ export default function Auth() {
   /* event handlers for onChange */
   const handleChangeTab = (e, newValue) => {
     setActiveTab(() => newValue);
-    checkStatus();
   };
 
   const handleChangeUserData = (e) => {
@@ -84,13 +83,18 @@ export default function Auth() {
   /* event handlers for onClick */
   const handleClick = async () => {
     const data = composeDataForBackend(userData, activeTab);
-    const response = await signup(data);
+    const response = await signUp(data);
 
     if (response === "pending") {
-      isBeingVerified(response);
+      dispatch({
+        type: "SET_USER",
+        payload: {
+          isBeingVerified: true,
+        },
+      });
       return navigate("/verification", { state: data, replace: true });
     }
-    if (response === "isTwilioError") setIsTwilioError(() => true);
+    if (response === "isTwilioError") setIsTwilioError(true);
 
     // other error
     return navigate("/sign-up");
@@ -98,10 +102,16 @@ export default function Auth() {
 
   const handleClickNoTwilio = async () => {
     const data = composeDataForBackend(userData, activeTab, false);
-    const response = await signup(data);
+    const response = await signUp(data);
 
     if (response === "approved") {
-      isApproved(response);
+      dispatch({
+        type: "SET_USER",
+        payload: {
+          isAuthenticated: true,
+          isBeingVerified: false,
+        },
+      });
       return navigate("/");
     }
     return navigate("/sign-up");

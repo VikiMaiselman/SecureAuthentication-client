@@ -1,9 +1,11 @@
 import React from "react";
-import { CardActions, CardContent, Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { CardActions, CardContent, Typography } from "@mui/material";
+
 import { DigitSlot, StyledButton, StyledCard, StyledHeader, VerificationBackground } from "./VerificationStyles";
-import { useAuth } from "../contexts/Authentication.context";
+import { verifyUser } from "../util/helpers";
 
 export default function Verification() {
   /* state, hooks */
@@ -15,7 +17,8 @@ export default function Verification() {
   const navigate = useNavigate();
 
   /* global-context */
-  const { isApproved, verify } = useAuth();
+  // const { isApproved, verify } = useAuth();
+  const dispatch = useDispatch();
 
   /* event handlers */
   const handleChange = (idx, value) => {
@@ -38,10 +41,16 @@ export default function Verification() {
   const handleClickVerify = async (e) => {
     const data = location.state;
     const updatedData = { ...data, otp: otpDigits.join("") };
-    const response = await verify(updatedData);
+    const response = await verifyUser(updatedData);
 
     if (response === "approved") {
-      isApproved(response);
+      dispatch({
+        type: "SET_USER",
+        payload: {
+          isAuthenticated: true,
+          isBeingVerified: false,
+        },
+      });
       return navigate("/");
     }
     // error case

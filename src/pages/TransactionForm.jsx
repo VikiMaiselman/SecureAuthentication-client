@@ -1,13 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
 import { Typography } from "@mui/material";
 
-import { useAuth } from "../contexts/Authentication.context";
-import { createTransaction } from "../util/helpers.js";
-import { useNavigate } from "react-router-dom";
+import { createTransaction, getTransactions } from "../util/helpers.js";
+
 import { StyledButton, StyledContainer, StyledTextField } from "./TransactionFormStyled";
 
 export default function TransactionForm() {
-  const { user, balance } = useAuth();
+  /* state */
   const [tx, setTx] = React.useState({
     name: "",
     amount: "",
@@ -15,7 +17,15 @@ export default function TransactionForm() {
   });
   const [errAmount, setErrAmount] = React.useState("");
   const [errReceiver, setErrReceiver] = React.useState("");
+
+  /* global state */
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const balance = useSelector((state) => state.balance);
+
+  /* navigation */
   const navigate = useNavigate();
+
 
   const validate = (inputName, inputValue) => {
     if (inputName === "amount") {
@@ -50,11 +60,17 @@ export default function TransactionForm() {
 
   const handleTransfer = async () => {
     await createTransaction(tx);
+    const transactions = await getTransactions();
+    dispatch({
+      type: "SET_TXS",
+      payload: transactions,
+    });
     setTx(() => ({
       name: "",
       amount: "",
       to: "",
     }));
+
     navigate("/dashboard");
   };
 

@@ -1,15 +1,20 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/Authentication.context";
+import { logout } from "../util/helpers";
+import { useDispatch } from "react-redux";
 
 export default function Logout() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const logOut = async () => {
       try {
         await logout();
+        dispatch({
+          type: "SET_USER",
+          payload: { isAuthenticated: false },
+        });
       } catch (error) {
         console.error(error);
       }
