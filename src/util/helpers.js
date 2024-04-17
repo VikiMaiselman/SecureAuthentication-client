@@ -17,11 +17,12 @@ export function composeDataForBackend(userData, activeTab, useTwilio = true) {
 export function getDateLabel(transactionDate) {
   const calcDaysPassed = (date1, date2) => Math.trunc(Math.abs(date2 - date1) / (24 * 3600 * 1000));
   const daysPassed = calcDaysPassed(new Date(), transactionDate);
+  console.log(daysPassed);
 
   if (daysPassed === 0) return "Today";
   if (daysPassed === 1) return "Yesterday";
   if (daysPassed <= 7) return `${daysPassed} days ago`;
-  return `${daysPassed.getDate()}`.padStart(2, 0);
+  return `${transactionDate.getDate()}/${transactionDate.getMonth()}/${transactionDate.getFullYear()}`;
 }
 
 export async function signUp(data) {

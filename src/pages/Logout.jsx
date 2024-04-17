@@ -15,6 +15,10 @@ export default function Logout() {
           type: "SET_USER",
           payload: { isAuthenticated: false },
         });
+        dispatch({
+          type: "SET_TXS",
+          payload: null,
+        });
       } catch (error) {
         console.error(error);
       }
